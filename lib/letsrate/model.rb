@@ -2,13 +2,14 @@ require 'active_support/concern'
 module Letsrate
   extend ActiveSupport::Concern
 
-  def rate(stars, user, dimension=nil, dirichlet_method=false)
+  def rate(stars, user, rating_scope, dimension=nil, dirichlet_method=false)
     dimension = nil if dimension.blank?
 
-    if can_rate? user, dimension
+    if can_rate? user, rating_scope, dimension
       rates(dimension).create! do |r|
         r.stars = stars
         r.rater = user
+        r.rating_scope = rating_scope
       end
       if dirichlet_method
         update_rate_average_dirichlet(stars, dimension)
@@ -65,8 +66,14 @@ module Letsrate
     dimension ?  self.send("#{dimension}_average") : rate_average_without_dimension
   end
 
-  def can_rate?(user, dimension=nil)
-    user.ratings_given.where(dimension: dimension, rateable_id: id, rateable_type: self.class.name).size.zero?
+  def can_rate?(user, rating_scope, dimension=nil)
+    user.ratings_given.where(
+      dimension: dimension,
+      rateable_id: id,
+      rateable_type: self.class.name,
+      rating_scope_id: rating_scope.id,
+      rating_scope_type: rating_scope.class.name
+    ).size.zero?
   end
 
   def rates(dimension=nil)
@@ -103,6 +110,10 @@ module Letsrate
                                               :as => :cacheable, :class_name => "RatingCache",
                                               :dependent => :destroy
       end
+    end
+
+    def letsrate_rating_scope
+      has_many :ratings, :class_name => "Rate", :foreign_key => :rating_scope
     end
   end
 
