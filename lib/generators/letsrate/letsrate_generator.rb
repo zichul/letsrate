@@ -14,17 +14,13 @@ class LetsrateGenerator < ActiveRecord::Generators::Base
     template 'cache_model.rb', File.join('app/models', "rating_cache.rb")
   end
 
-  # def add_rate_path_to_route
-    # route "post '/rate' => 'rater#create', :as => 'rate'"
-  # end
-
   desc "cacheable rating average migration is creating ..."
   def create_cacheable_migration
     migration_template "cache_migration.rb", "db/migrate/create_rating_caches.rb"
   end
 
   desc "migration is creating ..."
-  def create_migration
+  def create_rating_migration
     migration_template "migration.rb", "db/migrate/create_rates.rb"
   end
 end
