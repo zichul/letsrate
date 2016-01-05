@@ -115,7 +115,7 @@ module Letsrate
     end
 
     def letsrate_rating_scope
-      has_many :ratings, :class_name => "Rate", :as => :rating_scope, :dependent => :destory
+      has_many :ratings, :class_name => "Rate", :as => :rating_scope, :dependent => :destroy
     end
   end
 
